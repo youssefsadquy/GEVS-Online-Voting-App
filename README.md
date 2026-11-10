@@ -1,115 +1,226 @@
-# GEVS - General Election Voting System
+<div align="center">
+
+# GEVS
+
+**General Election Voting System**
+
+A full-stack online voting platform for a fictional election commission: voter registration, one vote per voter, live results and an election commission dashboard.
+
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
+
+[Features](#features) · [Architecture](#architecture) · [API](#api) · [Setup](#setup) · [Security](#security)
+
+</div>
+
+> **Coursework and demo project.** GEVS was built for a fictional election in Shangri-La. It is not affiliated with a real election authority and is not designed for production use.
 
 ## Overview
-The **General Election Voting System (GEVS)** is an online platform designed for the citizens of Shangri-La to facilitate voter registration and enable the casting of votes during elections. Developed in response to the Shangri-La Election Commission's decision to allow online voting, GEVS aims to provide a secure and accessible voting experience for all eligible voters.
 
-Historically, voters were required to present photo ID at polling stations, but many lacked the necessary identification. To address this, GEVS enables online voting, ensuring that all citizens can participate in the democratic process.
+GEVS allows eligible voters to register, authenticate, cast one vote in their constituency and view results. Election commission staff get a separate dashboard for running the election, resetting data and announcing a winner. The backend also exposes a small open-data API for constituency and national results.
+
+The project is split into a React single-page application and an Express API backed by Firebase Authentication and Cloud Firestore.
 
 ## Features
-- **Voter Registration**: Users can register by providing their Voter ID, Full Name, Date of Birth, Password, Constituency, and a Unique Voter Code (UVC).
-- **Voting**: Once registered, users can cast their vote for a candidate in their constituency. Each voter can only vote once.
-- **Election Commission Dashboard**: For authorized personnel to monitor elections and announce results.
-- **REST API**: Provides open access to election data and statistics.
 
+### Voter experience
 
-## UVC Code List
+- Register with a Unique Voter Code (UVC), entered manually or scanned as a QR code.
+- Sign in with email and password.
+- View the candidates standing in your constituency.
+- Cast one vote and see a confirmation.
+- Review your account details and voting status.
+- View constituency and national results.
 
-| Code      | Code      | Code      | Code      | Code      |
-|-----------|-----------|-----------|-----------|-----------|
-| HH64FWPE  | WL3K3YPT  | ZSRBTK9S  | D5BG6FDH  | 2LJFM6PM  |
-| BBMNS9ZJ  | JA9WCMAS  | B7DMPWCQ  | 38NWLPY3  | 2TEHRTHJ  |
-| KYMK9PUH  | Z93G7PN9  | YADA47RL  | 556JTA32  | G994LD9T  |
-| WPC5GEHA  | RXLNLTA6  | 9GTZQNKB  | LUFKZAHW  | Q452KVQE  |
-| 7XUFD78Y  | DBP4GQBQ  | KSM9NB5L  | 75NKUXAH  | 9FCV9RMT  |
-| BQCRWTSG  | JF2QD3UF  | BKMKJN5S  | DHKVCU8T  | TH9A6HUB  |
-| ML5NSKKG  | 8TEXF2HD  | N6HBFD2X  | PFXB8QXM  | UVE5M7FR  |
-| K96JNSXY  | K3EVS3NM  | 5492AC6V  | U5LGC65X  | 7983XU4M  |
+### Election commission
 
-## Usage Examples
+- Protected election commission dashboard.
+- Start and end the election.
+- Monitor live vote counts.
+- Reset candidate votes and party seats.
+- Determine and publish the overall winner.
+- View charts of constituency and national results.
 
-### For Regular Users:
-- **If registered**: Enter your **email address** and **password** to log in.
-- **If not registered**: Create an account by filling out the registration form with the following fields:
-     - **Email Address**
-     - **Full Name**
-     - **Date of Birth**
-     - **Password**
-     - **Constituency** (choose from 4 available options)
-     - **Unique Voter Code (UVC)** (you can either enter it manually or scan a QR code)
-- Once logged in, you can cast your vote for your selected candidate in your constituency.
-- After voting, you can:
-   - **View candidate statistics** for your constituency.
-   - **Review your account information** and ensure everything is accurate.
+### Open data
 
-### For Admins:
-- Log in using the **default admin credentials**:
-   - **Username**: election@shangrila.gov.sr
-   - **Password**: shangrila2024$
-- After logging in, access the **Admin Dashboard**, where you can:
-   - Use the **Election Control Panel** to:
-     - **Start or end elections**.
-     - **Erase party seats** or **reset candidates' votes**.
-   - View the **Election Winner** once the voting period concludes.
-   - Check the **Election Graph Results** for a visual representation of votes.
-   - Monitor **Real-time Election Results** as votes are cast.
+- Public constituency result endpoint.
+- Public national result endpoint with party seats and election status.
 
+## Architecture
 
+```mermaid
+flowchart LR
+    UI["React SPA<br/>Bootstrap + Chart.js"]
+    API["Express API<br/>JWT verification"]
+    AUTH["Firebase Authentication"]
+    DB[("Cloud Firestore<br/>voters, candidates, parties, election")]
+    ADMIN["Firebase Admin SDK"]
 
-## GEVS Open Data REST API
-The following HTTP requests are available for accessing election data:
+    UI <-->|HTTPS + ID token| API
+    UI <-->|Sign-in and registration| AUTH
+    API --> ADMIN
+    ADMIN <--> AUTH
+    ADMIN <--> DB
+```
 
-- **Get Constituency Information**:  
-  `GET /gevs/constituency/northern-kunlun-mountain`
-  
-- **Get Election Results**:  
-  `GET /gevs/results`
+The React app obtains a Firebase ID token and sends it to the Express API as a Bearer token. The API verifies the token with the Firebase Admin SDK before reading or writing protected data.
 
-## Prerequisites
-Before running the application, ensure you have the following installed:
+## Tech stack
 
-- Node.js
-- npm (Node Package Manager)
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, React Router 6, Bootstrap 5, Chart.js, qr-scanner, Axios |
+| Backend | Node.js, Express 4, Firebase Admin SDK |
+| Authentication | Firebase Authentication, email and password |
+| Database | Cloud Firestore |
+| Tooling | Create React App, concurrently, npm |
 
-## Installation
-To install the required dependencies, navigate to the root of the project directory and run the following command:
+## API
+
+### Public endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/gevs/constituency/:constituencyName` | Vote counts for one constituency |
+| `GET` | `/gevs/results` | Election status, winner and party seats |
+
+### Authenticated endpoints
+
+All protected routes expect `Authorization: Bearer <firebase-id-token>`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/signup` | Register a voter and consume a UVC |
+| `POST` | `/login` | Exchange email and password for a Firebase token |
+| `POST` | `/validateUVC` | Check whether a UVC is valid and unused |
+| `POST` | `/checkEmailExists` | Check whether an email is already registered |
+| `GET` | `/validateToken` | Verify the current session |
+| `GET` | `/getVoterInfo/:userId` | Voter profile and voting status |
+| `GET` | `/getCandidates/:constituency` | Candidates in a constituency |
+| `GET` | `/getCandidates` | All candidates |
+| `POST` | `/castVote` | Cast a vote |
+| `GET` | `/electionDetails` | Current election window and status |
+| `POST` | `/startElection` | Start the election |
+| `POST` | `/endElection` | End the election |
+| `POST` | `/resetVotes` | Reset all votes |
+| `POST` | `/resetPartySeats` | Reset party seats |
+| `POST` | `/updatePartySeats` | Update a party's seat count |
+| `GET` | `/determineOverallWinner` | Calculate the winner |
+| `GET` | `/parties` | Party list and seat counts |
+
+## Firestore data model
+
+| Collection | Main fields |
+|---|---|
+| `voters` | `voter_id`, `full_name`, `DOB`, `constituency`, `UVC`, `hasVoted`, `votedFor` |
+| `uvc_codes` | `UVC`, `used` |
+| `candidates` | `name`, `constituency`, `party`, `vote_count` |
+| `parties` | `name`, `seatsWon` |
+| `constituencies` | Constituency records used by the results views |
+| `election` | `status`, `start_time`, `end_time`, `winner` |
+
+The backend currently reads the election document by a fixed ID in `server.js`. Create that document or update the ID to match your Firebase project.
+
+## Setup
+
+### Prerequisites
+
+- Node.js 18 or newer (the original project used Node 21)
+- npm
+- A Firebase project with Authentication and Cloud Firestore enabled
+
+### 1. Install dependencies
 
 ```bash
+cd voting-app
+npm install
+
+cd frontend
+npm install
+
+cd ../backend
 npm install
 ```
 
-## Running the Application
-The GEVS application consists of a frontend and a backend, which can be run concurrently or individually, depending on your preference.
+The root package uses `concurrently` to run both apps together.
 
-### Running Concurrently
-To run both the frontend and backend concurrently from the root directory (./voting-app), use the following command:
+### 2. Configure Firebase
+
+1. Create a Firebase project and enable **Authentication > Email/Password**.
+2. Create a **Cloud Firestore** database.
+3. Register a Web app and copy its configuration into `voting-app/frontend/src/firebase.js`.
+4. Create a service account key in **Project settings > Service accounts**.
+5. Place the key in the backend folder or point the backend at it through an environment variable. Keep the key out of Git.
+
+The backend also uses a Firebase Web API key for password sign-in. Treat that value as configuration, not as a repository secret, and replace it with your own project's key.
+
+### 3. Seed Firestore
+
+Create the collections listed above. At minimum you need:
+
+- One `election` document with `status`, `start_time`, `end_time` and `winner`.
+- `candidates` with a `constituency` field and a numeric `vote_count`.
+- `parties` with `seatsWon`.
+- `uvc_codes` with `UVC` and `used: false`.
+- `constituencies` records for the result views.
+
+The original coursework dataset is not included in the repository. Do not reuse publicly posted demo codes in a real deployment.
+
+### 4. Run
+
+From `voting-app`:
 
 ```bash
 npm start
 ```
 
-This command uses the "concurrently" package to run both parts of the application, starting the frontend (React app) and the backend (Node.js server) simultaneously.
+This starts the React app on <http://localhost:3000> and the API on <http://localhost:5000>.
 
-### Running Individually
-If you prefer to run the frontend and backend separately, follow these steps:
-
-#### Frontend
-Navigate to the ./frontend directory and start the React application:
+To run them separately:
 
 ```bash
 cd frontend
 npm start
 ```
 
-#### Backend
-In a separate terminal, navigate to the backend directory and start the Node.js server:
-
 ```bash
 cd backend
 node server.js
 ```
 
-## Additional Information
-This project was developed using the following versions of Node.js and npm:
+## Project layout
 
-- Node.js: v21.1.0
-- npm: v10.2.5
+```text
+voting-app/
+├─ frontend/                 React application
+│  ├─ src/
+│  │  ├─ LandingPage.js
+│  │  ├─ VoterDashboard.js
+│  │  ├─ ElectionCommissionDashboard.js
+│  │  ├─ ConstituencyResults.js
+│  │  ├─ ElectionResults.js
+│  │  ├─ AuthContext.js
+│  │  └─ firebase.js
+│  └─ public/
+├─ backend/                  Express API
+│  ├─ server.js              Routes, Firebase Admin and vote logic
+│  └─ package.json
+└─ package.json              Runs both apps with concurrently
+```
+
+## Security
+
+This repository is a coursework prototype. Before adapting it for anything public:
+
+- Revoke and rotate any Firebase service-account key that has ever been committed to Git.
+- Load credentials from environment variables or a secret manager, never from source control.
+- Replace the demo Firebase project with your own and tighten Firestore security rules.
+- Add rate limiting, audit logging and stronger election controls.
+- Do not publish administrator passwords, UVC lists or other live credentials in the README.
+- Review the authentication and authorisation paths before trusting the result.
+
+## License
+
+No open-source license is included. The project is shared as a portfolio and coursework example. Contact the author before reusing it.
